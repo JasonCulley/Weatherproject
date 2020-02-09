@@ -5,7 +5,7 @@ import sys
 def main():
     print("Hello World")
     print(sys.argv[0])
-    print(sys.argv[1] + " and you're mom's also a ho")
+    print(sys.argv[1])
     
 if __name__ == "__main__":
     main()
