@@ -121,7 +121,7 @@ def findcords(search):
     
     ##uses google map API to find coordinates of any vaild location, long confusing string is my 
     ##API key
-    gmaps_key = googlemaps.Client(key = "AIzaSyBGtpQUCypoK-8LQHYdfhnd1KvnGykfzSI")
+    gmaps_key = googlemaps.Client(key = "API-KEY")
 
     geocode_result = gmaps_key.geocode(search)
     try:
