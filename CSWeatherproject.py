@@ -69,24 +69,46 @@ def read_the_station(thestation,days):
             if pretemp != None:
                 timestamp = (i["properties"]["timestamp"])
                 temperature = (i["properties"]["temperature"]["value"])
+                precipitation = ()
         dictionary.update({timestamp : temperature})
     #returns the last few days of weather data, phew!
     return(dictionary)
 
-
-def crunch_the_numbers(dictionary):
+def count_below_zero(list):
+    
+    belowzero = 0
+    
+    
+    for i in list:
+        
+        if int(i) < 0:
+            belowzero = belowzero +1
+    print("the number of times the temperature dropped below zero was", belowzero, " in", len(list))
+    return belowzero
+    
+    
+def is_it_icy(dictionary):
     
     #this is the temps in chronological order
     hours = (list(reversed(dictionary.keys())))
     temps = (list(reversed(dictionary.values())))
-    belowzero = 0
-    print(temps)
-    print (len(hours), " is the count")
-    for i in temps:
-        
-        if int(i) < 0:
-            belowzero = belowzero +1
-    print ("the number of times the temperature dropped below zero was", belowzero)
+    #print (len(hours), " is the count")
+    firstthirdtemp = temps[:(int((1/3)*len(temps)))]
+    secondthirdtemp = temps[(int((1/3)*len(temps))):(int((2/3)*len(temps)))+1]
+    thirdthirdtemp = temps[(int((2/3)*len(temps))):]
+    
+    firstthirdiciness = count_below_zero(firstthirdtemp)
+    secondthirdiciness = count_below_zero(secondthirdtemp)
+    thirdthirdiciness = count_below_zero(thirdthirdtemp)
+    print(firstthirdiciness, secondthirdiciness, thirdthirdiciness)
+    
+    if temps[-1] > 32:
+        return (False)
+    elif secondthirdiciness <= (int(.65*thirdthirdiciness)):
+        return (True)
+    
+    
+    
 def find_cord_data(data):
     ##goes into API and returns the new URL for raw forecast
     ## returned data is like "https://api.weather.gov/gridpoints/TOP/31,80/forecast"
@@ -112,12 +134,12 @@ def read_elevation(data):
        # windspeed = (i.get("windSpeed", "no windspeed available"))
        # temperaturetrend = (i.get("temperatureTrend", "no temperature trend available"))
       #  print (names, temperatures," Degrees", detailedforecast, "\n")
-def formURL(cords):
+def form_URL(cords):
     URL = "https://api.weather.gov/points/" + cords
     print (URL)
     return (urllib.request.urlopen(URL))
 
-def findcords(search):
+def find_cords(search):
     
     ##uses google map API to find coordinates of any vaild location, long confusing string is my 
     ##API key
@@ -139,13 +161,15 @@ def findcords(search):
 
 
 def main():
-    search = "Bend Oregon"
-    ##search = input("Where would you like the forecast for?: ")
+    #search = "Bend Oregon"
+    
+    search = input("Where would you like the forecast for?: ")
     #Uses Google API to get the coordinates of any location
-    cords = findcords(search)
+    #Uses Google API to get the coordinates of any location
+    cords = find_cords(search)
     print(cords)
     ##opens url then sends to find_forecast
-    URLopen = formURL(cords)
+    URLopen = form_URL(cords)
     data = URLopen.read()
     # goes into forecast link for your coordinate
     corddata = find_cord_data(data)
@@ -158,8 +182,9 @@ def main():
     #Determines the station with the closest elevation 
     thestation = find_closest(stationdic,elevation)
     print ("\n", "The station we'll be using is: ", thestation)
+    #gets the last x days of weather history from the station
     weatherhistory = read_the_station(thestation,4)
-    crunch_the_numbers(weatherhistory)
+    #Primary algorithm determining if the conditions are icy
+    print(is_it_icy(weatherhistory))
 if __name__ == "__main__":
     main()
-    
