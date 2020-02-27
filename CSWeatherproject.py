@@ -3,7 +3,7 @@ import pandas as pd
 import sys
 import urllib.request 
 import json
-
+import tkinter as tk
 
 
 def find_closest(dictionary,value):
@@ -81,36 +81,40 @@ def count_below_zero(list):
     
     for i in list:
         
-        if int(i) < 0:
+        if int(i) < 2:
             belowzero = belowzero +1
-    print("the number of times the temperature dropped below zero was", belowzero, " in", len(list))
+    #print("the number of times the temperature dropped below zero was", belowzero, " in", len(list))
     return belowzero
     
     
 def is_it_icy(dictionary):
     
     #this is the temps in chronological order
-    hours = (list(reversed(dictionary.keys())))
-    temps = (list(reversed(dictionary.values())))
-    #print (len(hours), " is the count")
-    firstthirdtemp = temps[:(int((1/3)*len(temps)))]
-    secondthirdtemp = temps[(int((1/3)*len(temps))):(int((2/3)*len(temps)))+1]
-    thirdthirdtemp = temps[(int((2/3)*len(temps))):]
+    temps = (list(dictionary.values()))
+  
+    warm = (len(temps))- (count_below_zero(temps))
+    cold = count_below_zero(temps)
+    if cold == 0:
+        cold = 1
+    ratio = warm/cold
     
-    firstthirdiciness = count_below_zero(firstthirdtemp)
-    secondthirdiciness = count_below_zero(secondthirdtemp)
-    thirdthirdiciness = count_below_zero(thirdthirdtemp)
-    print(firstthirdiciness, secondthirdiciness, thirdthirdiciness)
+    if ratio <= (1/3):
+        return("Condtions are ideal")
+    elif ratio <= (2/3):
+        return("Condtions are poor")
+    elif ratio > (2/3):
+        return("Conditions are spring skiing")
+    elif ratio > 1:
+        return("Conditions are not fit for skiing")
+    
+    
     ##Compare the precentage of the time above 2C to the percentage of the time below 2C
     ##above 2C / below 2C
     ##if that ratio is below 1/3 then ideal conditions, with percipitation its snowing and great
     ##if that ratio is between 1/3 and 2/3 than poor conditions, with percipitation its terrible
     ##if its greater than 2/3 than its spring skiing, same with percipitation
     ##if no below 2C there isnt snow
-    if temps[-1] > 32:
-        return (False)
-    elif secondthirdiciness <= (int(.65*thirdthirdiciness)):
-        return (True)
+    
     
     
     
@@ -188,8 +192,9 @@ def main():
     thestation = find_closest(stationdic,elevation)
     print ("\n", "The station we'll be using is: ", thestation)
     #gets the last x days of weather history from the station
-    weatherhistory = read_the_station(thestation,4)
+    weatherhistory = read_the_station(thestation,2)
     #Primary algorithm determining if the conditions are icy
-    print(is_it_icy(weatherhistory))
+    result = (is_it_icy(weatherhistory))
+    print(result)
 if __name__ == "__main__":
     main()
