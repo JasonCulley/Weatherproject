@@ -101,7 +101,12 @@ def is_it_icy(dictionary):
     secondthirdiciness = count_below_zero(secondthirdtemp)
     thirdthirdiciness = count_below_zero(thirdthirdtemp)
     print(firstthirdiciness, secondthirdiciness, thirdthirdiciness)
-    
+    ##Compare the precentage of the time above 2C to the percentage of the time below 2C
+    ##above 2C / below 2C
+    ##if that ratio is below 1/3 then ideal conditions, with percipitation its snowing and great
+    ##if that ratio is between 1/3 and 2/3 than poor conditions, with percipitation its terrible
+    ##if its greater than 2/3 than its spring skiing, same with percipitation
+    ##if no below 2C there isnt snow
     if temps[-1] > 32:
         return (False)
     elif secondthirdiciness <= (int(.65*thirdthirdiciness)):
