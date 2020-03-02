@@ -6,6 +6,60 @@ import json
 import tkinter as tk
 
 
+window = tk.Tk()
+class GUI():
+    def RunGUI(self):
+    
+        window.configure(bg ="#179de6")
+        
+        l1 = tk.Label(window, text = "Enter Snowpark Here: ",bg = "#179de6")
+        l2 = tk.Label(window, text = "Results should come in less than ten seconds",bg = "#179de6")
+        l3 = tk.Label(window, text = "API-KEY: ",bg = "#179de6")
+        
+        self.entSearch = tk.Entry(window,bg = "#179de6" )
+        
+        self.entKey = tk.Entry(window,bg = "#179de6" )
+        
+        self.entSearch.insert(0,"ex: Bend Oregon")
+        self.entKey.insert(0,"ex: AP5asdp234...")
+        
+        button = tk.Button(window, text ="Finish", width = 25, command = self.end, bg = "#179de6" )
+
+
+        l1.grid(row = 0, column = 0)
+        l2.grid(row = 3, column = 1)
+        l3.grid(row = 1, column = 0)
+        
+        self.entSearch.grid(row = 0, column = 1)
+        self.entKey.grid(row = 1, column = 1)
+        button.grid(row=2, column =1 )
+
+        window.mainloop()
+    
+    def end(self):
+    
+        
+        
+        
+        window1 = tk.Tk()
+        
+        window1.configure(bg ="#179de6")
+        result = main(self.entSearch.get(), self.entKey.get())
+        
+        l2 = tk.Label(window1, text = result, bg = "#179de6")
+        l2.grid(row = 0, column = 0)
+        
+        l4 = tk.Label(window1, text =("The station I am using for data is", thestation),bg = "#179de6")
+        l4.grid(row = 1, column = 0)
+        
+        l4 = tk.Label(window1, text =("The station's elevation is ", (int(elevation)*3.28084), " feet"),bg = "#179de6")
+        l4.grid(row = 2, column = 0)
+        
+        
+        
+        window.destroy()
+        
+        
 def find_closest(dictionary,value):
     result = min(dictionary.keys(), key = lambda key: abs(key-value))
     return(dictionary[result])
@@ -17,7 +71,7 @@ def find_station(data):
     
     theJSON = json.loads(data)
     if "observationStations" in theJSON["properties"]:
-        print (theJSON["properties"]["observationStations"])
+        #print (theJSON["properties"]["observationStations"])
         StationURL = (theJSON["properties"]["observationStations"])
 
     StationURLopen = urllib.request.urlopen(StationURL)
@@ -102,7 +156,7 @@ def is_it_icy(dictionary):
         return("Condtions are ideal")
     elif ratio <= (2/3):
         return("Condtions are poor")
-    elif ratio > (2/3):
+    elif ratio <= 1:
         return("Conditions are spring skiing")
     elif ratio > 1:
         return("Conditions are not fit for skiing")
@@ -132,7 +186,7 @@ def read_elevation(data):
     theJSON = json.loads(data)
     ## gets the elevation of the coordinate
     elevation = int((theJSON["properties"]["elevation"]["value"]))
-    print ("The elevation is" ,elevation)
+    #print ("The elevation is" ,elevation)
     return(int(elevation))
     #print ("The Weather.gov Projected forecast is: ")
     
@@ -145,14 +199,14 @@ def read_elevation(data):
       #  print (names, temperatures," Degrees", detailedforecast, "\n")
 def form_URL(cords):
     URL = "https://api.weather.gov/points/" + cords
-    print (URL)
+    #print (URL)
     return (urllib.request.urlopen(URL))
 
-def find_cords(search):
+def find_cords(search, KEY):
     
     ##uses google map API to find coordinates of any vaild location, long confusing string is my 
     ##API key
-    gmaps_key = googlemaps.Client(key = "API-KEY")
+    gmaps_key = googlemaps.Client(key = KEY)
 
     geocode_result = gmaps_key.geocode(search)
     try:
@@ -169,32 +223,37 @@ def find_cords(search):
 
 
 
-def main():
+def main(search, key):
     #search = "Bend Oregon"
     
-    search = input("Where would you like the forecast for?: ")
+    #search = input("Where would you like the forecast for?: ")
     #Uses Google API to get the coordinates of any location
     #Uses Google API to get the coordinates of any location
-    cords = find_cords(search)
-    print(cords)
+    cords = find_cords(search, key)
+    #print(cords)
     ##opens url then sends to find_forecast
     URLopen = form_URL(cords)
     data = URLopen.read()
     # goes into forecast link for your coordinate
     corddata = find_cord_data(data)
     #gets elevation from that data, returns it for comparrison with stations
+    global elevation 
     elevation = read_elevation(corddata)
     #gets the URL for the stations that are observing your coordinate with all the data
     Stationsdata = find_station(data)
     #gets the stations elevation and name of all the stations in the form of a dictionary
     stationdic = get_the_station(Stationsdata)
     #Determines the station with the closest elevation 
+    global thestation
     thestation = find_closest(stationdic,elevation)
-    print ("\n", "The station we'll be using is: ", thestation)
+    #print ("\n", "The station we'll be using is: ", thestation)
     #gets the last x days of weather history from the station
     weatherhistory = read_the_station(thestation,2)
     #Primary algorithm determining if the conditions are icy
+    
     result = (is_it_icy(weatherhistory))
-    print(result)
+    return(result)
 if __name__ == "__main__":
-    main()
+    firstGUI = GUI()
+    firstGUI.RunGUI()
+    
